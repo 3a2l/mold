@@ -38,7 +38,7 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=`pwd`/../mold -o $t/exe $t/a.o $t/b.o
+clang -fuse-ld=$1 -o $t/exe $t/a.o $t/b.o
 $t/exe | grep -q 'init1 init2 fini2 fini1'
 
 echo OK

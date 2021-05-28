@@ -2,7 +2,7 @@
 *.so
 *~
 /mold
-/test/tmp
+/test/linux/tmp
 options.inc
 core
 ld
