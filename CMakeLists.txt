@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 ###############################################################################
 # Third-party dependencies
 ###############################################################################
