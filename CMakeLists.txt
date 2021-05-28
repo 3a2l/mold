@@ -16,6 +16,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 ###############################################################################
 # pthreads
 if (UNIX AND NOT APPLE)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
 endif()
 
@@ -110,9 +111,10 @@ target_link_libraries(mold
         TBB::tbb
         zlib
         xxHash::xxhash
-        #mimalloc-static
         $<$<PLATFORM_ID:Linux>:dl>
         $<$<PLATFORM_ID:Linux>:Threads::Threads>)
+
+add_dependencies(mold mimalloc-static)
 
 add_library(mold-wrapper SHARED)
 

@@ -5,7 +5,7 @@ echo -n "Testing $(basename -s .sh $0) ... "
 t=$(pwd)/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
-cat <<EOF | cc -c -g -o $t/a.o -ffunction-sections -fdata-sections -xc -
+cat <<EOF | cc -c -o $t/a.o -ffunction-sections -fdata-sections -xc -
 #include <stdio.h>
 
 int bar() {
