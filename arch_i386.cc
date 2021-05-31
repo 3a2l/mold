@@ -73,7 +73,7 @@ void PltGotSection<I386>::copy_buf(Context<I386> &ctx) {
       0x66, 0x90,             // nop
     };
 
-    for (i64 i = 0; i < symbols.size(); i++) {
+    for (size_t i = 0; i < symbols.size(); i++) {
       u8 *ent = buf + i * sizeof(data);
       memcpy(ent, data, sizeof(data));
       *(u32 *)(ent + 2) = symbols[i]->get_got_addr(ctx) - ctx.got->shdr.sh_addr;
@@ -84,7 +84,7 @@ void PltGotSection<I386>::copy_buf(Context<I386> &ctx) {
       0x66, 0x90,             // nop
     };
 
-    for (i64 i = 0; i < symbols.size(); i++) {
+    for (size_t i = 0; i < symbols.size(); i++) {
       u8 *ent = buf + i * sizeof(data);
       memcpy(ent, data, sizeof(data));
       *(u32 *)(ent + 2) = symbols[i]->get_got_addr(ctx);
@@ -151,7 +151,7 @@ void InputSection<I386>::apply_reloc_alloc(Context<I386> &ctx, u8 *base) {
     dynrel = (ElfRel<I386> *)(ctx.buf + ctx.reldyn->shdr.sh_offset +
                               file.reldyn_offset + this->reldyn_offset);
 
-  for (i64 i = 0; i < rels.size(); i++) {
+  for (size_t i = 0; i < rels.size(); i++) {
     const ElfRel<I386> &rel = rels[i];
     Symbol<I386> &sym = *file.symbols[rel.r_sym];
     u8 *loc = base + rel.r_offset;
@@ -250,7 +250,7 @@ void InputSection<I386>::apply_reloc_nonalloc(Context<I386> &ctx, u8 *base) {
   std::span<ElfRel<I386>> rels = get_rels(ctx);
   i64 frag_idx = 0;
 
-  for (i64 i = 0; i < rels.size(); i++) {
+  for (size_t i = 0; i < rels.size(); i++) {
     const ElfRel<I386> &rel = rels[i];
     Symbol<I386> &sym = *file.symbols[rel.r_sym];
     u8 *loc = base + rel.r_offset;
@@ -306,7 +306,7 @@ void InputSection<I386>::scan_relocations(Context<I386> &ctx) {
   std::span<ElfRel<I386>> rels = get_rels(ctx);
 
   // Scan relocations
-  for (i64 i = 0; i < rels.size(); i++) {
+  for (size_t i = 0; i < rels.size(); i++) {
     const ElfRel<I386> &rel = rels[i];
     Symbol<I386> &sym = *file.symbols[rel.r_sym];
     u8 *loc = (u8 *)(contents.data() + rel.r_offset);
@@ -329,9 +329,9 @@ void InputSection<I386>::scan_relocations(Context<I386> &ctx) {
     case R_386_16: {
       Action table[][4] = {
         // Absolute  Local  Imported data  Imported code
-        {  NONE,     ERROR, ERROR,         ERROR },      // DSO
-        {  NONE,     ERROR, ERROR,         ERROR },      // PIE
-        {  NONE,     NONE,  COPYREL,       PLT   },      // PDE
+        {  ACTION_NONE,     ACTION_ERROR, ACTION_ERROR,         ACTION_ERROR },      // DSO
+        {  ACTION_NONE,     ACTION_ERROR, ACTION_ERROR,         ACTION_ERROR },      // PIE
+        {  ACTION_NONE,     ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PDE
       };
 
       dispatch(ctx, table, R_ABS, i);
@@ -340,9 +340,9 @@ void InputSection<I386>::scan_relocations(Context<I386> &ctx) {
     case R_386_32: {
       Action table[][4] = {
         // Absolute  Local    Imported data  Imported code
-        {  NONE,     BASEREL, DYNREL,        DYNREL },     // DSO
-        {  NONE,     BASEREL, DYNREL,        DYNREL },     // PIE
-        {  NONE,     NONE,    COPYREL,       PLT    },     // PDE
+        {  ACTION_NONE,     ACTION_BASEREL, ACTION_DYNREL,        ACTION_DYNREL },     // DSO
+        {  ACTION_NONE,     ACTION_BASEREL, ACTION_DYNREL,        ACTION_DYNREL },     // PIE
+        {  ACTION_NONE,     ACTION_NONE,    ACTION_COPYREL,       ACTION_PLT    },     // PDE
       };
 
       dispatch(ctx, table, R_ABS, i);
@@ -352,9 +352,9 @@ void InputSection<I386>::scan_relocations(Context<I386> &ctx) {
     case R_386_PC16: {
       Action table[][4] = {
         // Absolute  Local  Imported data  Imported code
-        {  ERROR,    NONE,  ERROR,         ERROR },      // DSO
-        {  ERROR,    NONE,  COPYREL,       PLT   },      // PIE
-        {  NONE,     NONE,  COPYREL,       PLT   },      // PDE
+        {  ACTION_ERROR,    ACTION_NONE,  ACTION_ERROR,         ACTION_ERROR },      // DSO
+        {  ACTION_ERROR,    ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PIE
+        {  ACTION_NONE,     ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PDE
       };
 
       dispatch(ctx, table, R_PC, i);
@@ -363,9 +363,9 @@ void InputSection<I386>::scan_relocations(Context<I386> &ctx) {
     case R_386_PC32: {
       Action table[][4] = {
         // Absolute  Local  Imported data  Imported code
-        {  BASEREL,  NONE,  ERROR,         ERROR },      // DSO
-        {  BASEREL,  NONE,  COPYREL,       PLT   },      // PIE
-        {  NONE,     NONE,  COPYREL,       PLT   },      // PDE
+        {  ACTION_BASEREL,  ACTION_NONE,  ACTION_ERROR,         ACTION_ERROR },      // DSO
+        {  ACTION_BASEREL,  ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PIE
+        {  ACTION_NONE,     ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PDE
       };
 
       dispatch(ctx, table, R_PC, i);

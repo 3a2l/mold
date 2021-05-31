@@ -1,22 +1,21 @@
 #include "mold.h"
 
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
-static u32 get_umask() {
-  u32 orig_umask = umask(0);
-  umask(orig_umask);
-  return orig_umask;
-}
-
 template <typename E>
 class MemoryMappedOutputFile : public OutputFile<E> {
 public:
   MemoryMappedOutputFile(Context<E> &ctx, std::string path, i64 filesize)
     : OutputFile<E>(path, filesize, true) {
     std::string dir(path_dirname(path));
+
+    this->tmpfile = (char*)save_string(ctx, create_temporary_file(dir)).data();
+    rename(path.c_str(), this->tmpfile);
+
+    this->buf = (u8*)map_memory(this->tmpfile, MAP_MODE_READWRITE, filesize);
+
+    if (this->buf == nullptr)
+        Fatal(ctx) << "MapViewOfFile failed: " << ::GetLastError();
+#if 0
+    // TODO: LINUX
     this->tmpfile = (char *)save_string(ctx, dir + "/.mold-XXXXXX").data();
     i64 fd = mkstemp(this->tmpfile);
     if (fd == -1)
@@ -46,16 +45,16 @@ public:
     if (this->buf == MAP_FAILED)
       Fatal(ctx) << path << ": mmap failed: " << strerror(errno);
     ::close(fd);
+#endif
   }
 
   void close(Context<E> &ctx) override {
     Timer t(ctx, "close_file");
 
     if (!ctx.buildid)
-      munmap(this->buf, this->filesize);
-
+        unmap_memory(this->buf, this->filesize);
     if (rename(this->tmpfile, this->path.c_str()) == -1)
-      Fatal(ctx) << this->path << ": rename failed: " << strerror(errno);
+        Fatal(ctx) << this->path << ": rename failed: " << strerror(errno);
     this->tmpfile = nullptr;
   }
 };
@@ -65,15 +64,20 @@ class MallocOutputFile : public OutputFile<E> {
 public:
   MallocOutputFile(Context<E> &ctx, std::string path, u64 filesize)
     : OutputFile<E>(path, filesize, false) {
+      this->buf = (u8*)map_memory(filesize);
+#if 0
+    // TODO: LINUX
     this->buf = (u8 *)mmap(NULL, filesize, PROT_READ | PROT_WRITE,
                            MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (this->buf == MAP_FAILED)
       Fatal(ctx) << "mmap failed: " << strerror(errno);
+#endif
   }
 
   void close(Context<E> &ctx) override {
     Timer t(ctx, "close_file");
-
+#ifdef WIN32
+#else
     if (this->path == "-") {
       fwrite(this->buf, this->filesize, 1, stdout);
       fclose(stdout);
@@ -87,6 +91,7 @@ public:
     FILE *fp = fdopen(fd, "w");
     fwrite(this->buf, this->filesize, 1, fp);
     fclose(fp);
+#endif
   }
 };
 

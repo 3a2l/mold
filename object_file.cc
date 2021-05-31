@@ -3,10 +3,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <regex>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+
 #include <zlib.h>
 
 template <typename E>
@@ -18,7 +15,11 @@ MemoryMappedFile<E>::open(Context<E> &ctx, std::string path) {
   struct stat st;
   if (stat(path.c_str(), &st) == -1)
     return nullptr;
+#ifdef WIN32
+  u64 mtime = st.st_mtime;
+#else
   u64 mtime = (u64)st.st_mtim.tv_sec * 1000000000 + st.st_mtim.tv_nsec;
+#endif
 
   MemoryMappedFile *mb = new MemoryMappedFile(path, nullptr, st.st_size, mtime);
   ctx.owning_mbs.push_back(std::unique_ptr<MemoryMappedFile>(mb));
@@ -42,14 +43,19 @@ u8 *MemoryMappedFile<E>::data(Context<E> &ctx) {
   if (data_)
     return data_;
 
+  data_ = (u8*)map_memory(name, MAP_MODE_READ, size_);
+#if 0
+  // TODO: LINUX
   i64 fd = ::open(name.c_str(), O_RDONLY);
   if (fd == -1)
-    Fatal(ctx) << name << ": cannot open: " << strerror(errno);
+      Fatal(ctx) << name << ": cannot open: " << strerror(errno);
 
   data_ = (u8 *)mmap(nullptr, size_, PROT_READ, MAP_PRIVATE, fd, 0);
   if (data_ == MAP_FAILED)
     Fatal(ctx) << name << ": mmap failed: " << strerror(errno);
+
   close(fd);
+#endif
   return data_;
 }
 
@@ -66,7 +72,7 @@ MemoryMappedFile<E>::slice(Context<E> &ctx, std::string name, u64 start,
 template <typename E>
 MemoryMappedFile<E>::~MemoryMappedFile() {
   if (data_ && !parent)
-    munmap(data_, size_);
+      unmap_memory(data_, size_);
 }
 
 template <typename E>

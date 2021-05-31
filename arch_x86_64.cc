@@ -505,9 +505,9 @@ void InputSection<X86_64>::scan_relocations(Context<X86_64> &ctx) {
       // error if we cannot relocate them even at load-time.
       Action table[][4] = {
         // Absolute  Local  Imported data  Imported code
-        {  NONE,     ERROR, ERROR,         ERROR },      // DSO
-        {  NONE,     ERROR, ERROR,         ERROR },      // PIE
-        {  NONE,     NONE,  COPYREL,       PLT   },      // PDE
+        {  ACTION_NONE,     ACTION_ERROR, ACTION_ERROR,         ACTION_ERROR },      // DSO
+        {  ACTION_NONE,     ACTION_ERROR, ACTION_ERROR,         ACTION_ERROR },      // PIE
+        {  ACTION_NONE,     ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PDE
       };
 
       dispatch(ctx, table, R_ABS, i);
@@ -518,9 +518,9 @@ void InputSection<X86_64>::scan_relocations(Context<X86_64> &ctx) {
       // relocations.
       Action table[][4] = {
         // Absolute  Local    Imported data  Imported code
-        {  NONE,     BASEREL, DYNREL,        DYNREL },     // DSO
-        {  NONE,     BASEREL, DYNREL,        DYNREL },     // PIE
-        {  NONE,     NONE,    COPYREL,       PLT    },     // PDE
+        {  ACTION_NONE,     ACTION_BASEREL, ACTION_DYNREL,        ACTION_DYNREL },     // DSO
+        {  ACTION_NONE,     ACTION_BASEREL, ACTION_DYNREL,        ACTION_DYNREL },     // PIE
+        {  ACTION_NONE,     ACTION_NONE,    ACTION_COPYREL,       ACTION_PLT    },     // PDE
       };
 
       dispatch(ctx, table, R_ABS, i);
@@ -531,9 +531,9 @@ void InputSection<X86_64>::scan_relocations(Context<X86_64> &ctx) {
     case R_X86_64_PC32: {
       Action table[][4] = {
         // Absolute  Local  Imported data  Imported code
-        {  ERROR,    NONE,  ERROR,         ERROR },      // DSO
-        {  ERROR,    NONE,  COPYREL,       PLT   },      // PIE
-        {  NONE,     NONE,  COPYREL,       PLT   },      // PDE
+        {  ACTION_ERROR,    ACTION_NONE,  ACTION_ERROR,         ACTION_ERROR },      // DSO
+        {  ACTION_ERROR,    ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PIE
+        {  ACTION_NONE,     ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PDE
       };
 
       dispatch(ctx, table, R_PC, i);
@@ -542,9 +542,9 @@ void InputSection<X86_64>::scan_relocations(Context<X86_64> &ctx) {
     case R_X86_64_PC64: {
       Action table[][4] = {
         // Absolute  Local  Imported data  Imported code
-        {  BASEREL,  NONE,  ERROR,         ERROR },      // DSO
-        {  BASEREL,  NONE,  COPYREL,       PLT   },      // PIE
-        {  NONE,     NONE,  COPYREL,       PLT   },      // PDE
+        {  ACTION_BASEREL,  ACTION_NONE,  ACTION_ERROR,         ACTION_ERROR },      // DSO
+        {  ACTION_BASEREL,  ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PIE
+        {  ACTION_NONE,     ACTION_NONE,  ACTION_COPYREL,       ACTION_PLT   },      // PDE
       };
 
       dispatch(ctx, table, R_PC, i);

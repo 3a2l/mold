@@ -59,12 +59,12 @@ void InputSection<E>::dispatch(Context<E> &ctx, Action table[3][4],
   Action action = table[get_output_type(ctx)][get_sym_type(ctx, sym)];
 
   switch (action) {
-  case NONE:
+  case ACTION_NONE:
     rel_types[i] = rel_type;
     return;
-  case ERROR:
+  case ACTION_ERROR:
     break;
-  case COPYREL:
+  case ACTION_COPYREL:
     if (!ctx.arg.z_copyreloc)
       break;
     if (sym.esym().st_visibility == STV_PROTECTED)
@@ -74,18 +74,18 @@ void InputSection<E>::dispatch(Context<E> &ctx, Action table[3][4],
     sym.flags |= NEEDS_COPYREL;
     rel_types[i] = rel_type;
     return;
-  case PLT:
+  case ACTION_PLT:
     sym.flags |= NEEDS_PLT;
     rel_types[i] = rel_type;
     return;
-  case DYNREL:
+  case ACTION_DYNREL:
     if (is_readonly)
       break;
     sym.flags |= NEEDS_DYNSYM;
     rel_types[i] = R_DYN;
     file.num_dynrel++;
     return;
-  case BASEREL:
+  case ACTION_BASEREL:
     if (is_readonly)
       break;
     rel_types[i] = R_BASEREL;

@@ -5,7 +5,6 @@
 #include <signal.h>
 #include <tbb/global_control.h>
 #include <tbb/parallel_for_each.h>
-#include <unistd.h>
 #include <unordered_set>
 
 template <typename E>
@@ -355,8 +354,8 @@ int do_main(int argc, char **argv) {
   signal(SIGINT, signal_handler<E>);
   signal(SIGTERM, signal_handler<E>);
 
-  if (!ctx.arg.directory.empty() && chdir(ctx.arg.directory.c_str()) == -1)
-    Fatal(ctx) << "chdir failed: " << ctx.arg.directory
+  if (!ctx.arg.directory.empty() && !set_current_dir(ctx.arg.directory.c_str()))
+    Fatal(ctx) << "changing current directory failed: " << ctx.arg.directory
                << ": " << strerror(errno);
 
   // Handle --wrap options if any.
@@ -557,7 +556,7 @@ int do_main(int argc, char **argv) {
   });
 
   // Set section indices.
-  for (i64 i = 0, shndx = 1; i < ctx.chunks.size(); i++)
+  for (size_t i = 0, shndx = 1; i < ctx.chunks.size(); i++)
     if (ctx.chunks[i]->kind != OutputChunk<E>::HEADER)
       ctx.chunks[i]->shndx = shndx++;
 

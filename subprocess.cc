@@ -1,6 +1,7 @@
 #include "mold.h"
 
-#include <openssl/sha.h>
+#ifdef WIN32
+#else
 #include <sys/signal.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -8,6 +9,9 @@
 #include <sys/un.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#endif
+
+#include "openssl/sha.h"
 
 #define DAEMON_TIMEOUT 30
 
@@ -15,6 +19,10 @@
 // it may take a few hundred milliseconds. To hide the latency,
 // we fork a child and let it do the actual linking work.
 std::function<void()> fork_child() {
+#ifdef WIN32
+    // TODO
+    return std::function<void()>();
+#else
   int pipefd[2];
   if (pipe(pipefd) == -1) {
     perror("pipe");
@@ -48,6 +56,7 @@ std::function<void()> fork_child() {
   // Child
   close(pipefd[0]);
   return [=]() { write(pipefd[1], (char []){1}, 1); };
+#endif
 }
 
 static std::string base64(u8 *data, u64 size) {
@@ -92,6 +101,8 @@ static std::string compute_sha256(std::span<std::string_view> argv) {
 
 template <typename E>
 static void send_fd(Context<E> &ctx, i64 conn, i64 fd) {
+#ifdef WIN32
+#else
   struct iovec iov;
   char dummy = '1';
   iov.iov_base = &dummy;
@@ -113,10 +124,15 @@ static void send_fd(Context<E> &ctx, i64 conn, i64 fd) {
 
   if (sendmsg(conn, &msg, 0) == -1)
     Fatal(ctx) << "sendmsg failed: " << strerror(errno);
+#endif
 }
 
 template <typename E>
 static i64 recv_fd(Context<E> &ctx, i64 conn) {
+#ifdef WIN32
+    // TODO
+    return -1;
+#else
   struct iovec iov;
   char buf[1];
   iov.iov_base = buf;
@@ -137,10 +153,14 @@ static i64 recv_fd(Context<E> &ctx, i64 conn) {
   struct cmsghdr *cmsg;
   cmsg = CMSG_FIRSTHDR(&msg);
   return *(int *)CMSG_DATA(cmsg);
+#endif
 }
 
 template <typename E>
 void try_resume_daemon(Context<E> &ctx) {
+#ifdef WIN32
+    // TODO
+#else
   i64 conn = socket(AF_UNIX, SOCK_STREAM, 0);
   if (conn == -1)
     Fatal(ctx) << "socket failed: " << strerror(errno);
@@ -162,11 +182,15 @@ void try_resume_daemon(Context<E> &ctx) {
   close(conn);
   if (r == 1)
     exit(0);
+#endif
 }
 
 template <typename E>
 void daemonize(Context<E> &ctx, std::function<void()> *wait_for_client,
                std::function<void()> *on_complete) {
+#ifdef WIN32
+    // TODO
+#else
   if (daemon(1, 0) == -1)
     Fatal(ctx) << "daemon failed: " << strerror(errno);
 
@@ -230,10 +254,14 @@ void daemonize(Context<E> &ctx, std::function<void()> *wait_for_client,
     char buf[] = {1};
     write(conn, buf, 1);
   };
+#endif
 }
 
 template <typename E>
 static std::string get_self_path(Context<E> &ctx) {
+    return get_self_path();
+#if 0
+    // TODO: LINUX
   char buf[4096];
   size_t n = readlink("/proc/self/exe", buf, sizeof(buf));
   if (n == -1)
@@ -241,10 +269,10 @@ static std::string get_self_path(Context<E> &ctx) {
   if (n == sizeof(buf))
     Fatal(ctx) << "readlink: path too long";
   return {buf, n};
+#endif
 }
 
 template <typename E>
-[[noreturn]]
 void process_run_subcommand(Context<E> &ctx, int argc, char **argv) {
   std::string_view arg1 = argv[1];
   assert(arg1 == "-run" || arg1 == "--run");
@@ -280,6 +308,8 @@ void process_run_subcommand(Context<E> &ctx, int argc, char **argv) {
   // Execute a given command
   execvp(argv[2], argv + 2);
   Fatal(ctx) << "mold -run failed: " << argv[2] << ": " << strerror(errno);
+
+  throw std::runtime_error("SHOULD NOT BE REACHED");
 }
 
 #define INSTANTIATE(E)                                                  \

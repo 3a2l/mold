@@ -1,12 +1,5 @@
 #include "mold.h"
 
-std::string get_current_dir() {
-  std::string buf(8192, '\0');
-  getcwd(buf.data(), buf.size());
-  buf.resize(buf.find_first_of('\0'));
-  return buf;
-}
-
 // Returns the directory part of a given path.
 // Returns '.' if path doesn't contain '/'.
 std::string_view path_dirname(std::string_view path) {

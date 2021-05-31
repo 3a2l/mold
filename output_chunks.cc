@@ -1,12 +1,12 @@
 #include "mold.h"
 
-#include <openssl/rand.h>
-#include <openssl/sha.h>
 #include <shared_mutex>
-#include <sys/mman.h>
-#include <tbb/parallel_for_each.h>
-#include <tbb/parallel_sort.h>
-#include <zlib.h>
+
+#include "openssl/rand.h"
+#include "openssl/sha.h"
+#include "tbb/parallel_for_each.h"
+#include "tbb/parallel_sort.h"
+#include "zlib.h"
 
 template <typename E>
 void OutputChunk<E>::write_to(Context<E> &ctx, u8 *buf) {
@@ -1555,7 +1555,7 @@ static void compute_sha256(Context<E> &ctx, i64 offset) {
     // at the beginning of an output file. This is an ugly performance
     // hack, but we can save about 30 ms for a 2 GiB output.
     if (i > 0 && ctx.output_file->is_mmapped)
-      munmap(begin, sz);
+        unmap_memory(begin, sz);
   });
 
   assert(ctx.arg.build_id.size(ctx) <= SHA256_SIZE);
@@ -1565,7 +1565,7 @@ static void compute_sha256(Context<E> &ctx, i64 offset) {
   memcpy(buf + offset, digest, ctx.arg.build_id.size(ctx));
 
   if (ctx.output_file->is_mmapped)
-    munmap(buf, std::min(bufsize, shard_size));
+      unmap_memory(buf, std::min(bufsize, shard_size));
 }
 
 template <typename E>

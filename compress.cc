@@ -14,8 +14,8 @@
 
 #include "mold.h"
 
-#include <tbb/parallel_for_each.h>
-#include <zlib.h>
+#include "tbb/parallel_for_each.h"
+#include "zlib.h"
 
 static constexpr i64 SHARD_SIZE = 1024 * 1024;
 

@@ -1,10 +1,21 @@
 #pragma once
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
+#ifndef WIN32
+#   ifndef _GNU_SOURCE
+#       define _GNU_SOURCE
+#   endif
 #endif
 
+#include "platform.h"
+
 #include "elf.h"
+
+#ifdef _MSC_VER
+#include <intrin.h>
+#define __builtin_popcount __popcnt64
+#define __builtin_clzl __lzcnt64
+#define unlink _unlink
+#endif
 
 #include <atomic>
 #include <cassert>
@@ -27,7 +38,6 @@
 #include <unordered_set>
 #include <vector>
 #include <xxh3.h>
-#include <unistd.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -301,7 +311,7 @@ public:
   bool is_ehframe = false;
 
 private:
-  typedef enum { NONE, ERROR, COPYREL, PLT, DYNREL, BASEREL } Action;
+  typedef enum { ACTION_NONE, ACTION_ERROR, ACTION_COPYREL, ACTION_PLT, ACTION_DYNREL, ACTION_BASEREL } Action;
 
   void uncompress_old_style(Context<E> &ctx);
   void uncompress_new_style(Context<E> &ctx);
@@ -1097,7 +1107,6 @@ protected:
 //
 
 // These are various utility functions to deal with file pathnames.
-std::string get_current_dir();
 std::string_view path_dirname(std::string_view path);
 std::string_view path_filename(std::string_view path);
 std::string_view path_basename(std::string_view path);
@@ -1693,7 +1702,7 @@ template <typename E>
 class Symbol {
 public:
   Symbol() = default;
-  Symbol(std::string_view name) : nameptr(name.data()), namelen(name.size()) {}
+  Symbol(std::string_view name) : nameptr(name.data()), namelen((i32)name.size()) {}
   Symbol(const Symbol<E> &other) : Symbol(other.name()) {}
 
   // If we haven't seen the same `key` before, create a new instance
@@ -2093,7 +2102,7 @@ inline std::string_view InputFile<E>::get_string(Context<E> &ctx, i64 idx) {
 template <typename E>
 inline i64 ObjectFile<E>::get_shndx(const ElfSym<E> &esym) {
   assert(&elf_syms[0] <= &esym);
-  assert(&esym < &elf_syms[elf_syms.size()]);
+  //assert(&esym < &elf_syms[elf_syms.size() - 1]);
 
   if (esym.st_shndx == SHN_XINDEX)
     return symtab_shndx_sec[&esym - &elf_syms[0]];

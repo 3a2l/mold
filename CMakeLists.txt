@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
 project(mold
+        LANGUAGES C CXX
         VERSION 0.1.1)
 
 ###############################################################################
@@ -90,6 +91,9 @@ target_sources(mold
         output_file.cc
         passes.cc
         perf.cc
+        platform.h
+        $<$<PLATFORM_ID:Windows>:platform_windows.cc>
+        $<$<PLATFORM_ID:Linux>:platform_linux.cc>
         subprocess.cc
         symbols.cc
         tar.cc)
@@ -97,11 +101,13 @@ target_sources(mold
 target_compile_definitions(mold
     PRIVATE
         "GIT_HASH=\"${GIT_HASH}\""
-        "MOLD_VERSION=\"${PROJECT_VERSION}\"")
+        "MOLD_VERSION=\"${PROJECT_VERSION}\""
+        $<$<PLATFORM_ID:Windows>:UNICODE;_UNICODE;NOMINMAX>)
 
 target_compile_options(mold
     PRIVATE
-        $<$<PLATFORM_ID:Linux>:-Wno-deprecated-volatile>)
+        $<$<PLATFORM_ID:Linux>:-Wno-deprecated-volatile>
+        $<$<CXX_COMPILER_ID:MSVC>:/MP>)
 
 target_link_options(mold
     PRIVATE
@@ -114,19 +120,22 @@ target_link_libraries(mold
         zlib
         xxHash::xxhash
         $<$<PLATFORM_ID:Linux>:dl>
-        $<$<PLATFORM_ID:Linux>:Threads::Threads>)
+        $<$<PLATFORM_ID:Linux>:Threads::Threads>
+        $<$<CXX_COMPILER_ID:MSVC>:Dbghelp.lib>)
 
 add_dependencies(mold mimalloc-static)
 
-add_library(mold-wrapper SHARED)
+if (NOT WIN32)
+    add_library(mold-wrapper SHARED)
 
-target_sources(mold-wrapper
-    PRIVATE
-        mold-wrapper.c)
+    target_sources(mold-wrapper
+        PRIVATE
+            mold-wrapper.c)
 
-target_link_libraries(mold-wrapper
-    PRIVATE
-        $<$<PLATFORM_ID:Linux>:dl>)
+    target_link_libraries(mold-wrapper
+        PRIVATE
+            $<$<PLATFORM_ID:Linux>:dl>)
+endif()
 
 ###############################################################################
 # Tests
@@ -136,7 +145,7 @@ if (MOLD_TESTS)
 
     if (UNIX)
         set(MOLD_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test/linux)
-        
+
         add_test(NAME allow-multiple-definition
                  COMMAND ${MOLD_TEST_DIR}/allow-multiple-definition.sh ${CMAKE_CURRENT_BINARY_DIR}/Testing $<TARGET_FILE:mold>
                  WORKING_DIRECTORY ${MOLD_TEST_DIR})
