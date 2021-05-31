@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -o $t/a.o -c -x assembler -
@@ -20,7 +20,7 @@ msg:
   .string "Hello world\n"
 EOF
 
-$1 -o $t/exe \
+$2 -o $t/exe \
   -dynamic-linker=/lib64/ld-linux-x86-64.so.2 \
   /usr/lib/x86_64-linux-gnu/crt1.o \
   /usr/lib/x86_64-linux-gnu/crti.o \

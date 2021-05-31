@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | clang -c -o $t/a.o -xc++ -
@@ -12,13 +12,13 @@ int main() {
 }
 EOF
 
-! clang -fuse-ld=$1 -o $t/exe $t/a.o -Wl,-no-demangle 2> $t/log || false
+! clang -fuse-ld=$2 -o $t/exe $t/a.o -Wl,-no-demangle 2> $t/log || false
 grep -q 'undefined symbol: .*: _Z3fooii' $t/log
 
-! clang -fuse-ld=$1 -o $t/exe $t/a.o -Wl,-demangle 2> $t/log || false
+! clang -fuse-ld=$2 -o $t/exe $t/a.o -Wl,-demangle 2> $t/log || false
 grep -Pq 'undefined symbol: .*: foo\(int, int\)' $t/log
 
-! clang -fuse-ld=$1 -o $t/exe $t/a.o 2> $t/log || false
+! clang -fuse-ld=$2 -o $t/exe $t/a.o 2> $t/log || false
 grep -Pq 'undefined symbol: .*: foo\(int, int\)' $t/log
 
 cat <<EOF | clang -c -o $t/b.o -xc -
@@ -28,7 +28,7 @@ int main() {
 }
 EOF
 
-! clang -fuse-ld=$1 -o $t/exe $t/b.o -Wl,-demangle 2> $t/log || false
+! clang -fuse-ld=$2 -o $t/exe $t/b.o -Wl,-demangle 2> $t/log || false
 grep -q 'undefined symbol: .*: Pi' $t/log
 
 echo OK

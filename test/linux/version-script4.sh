@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF > $t/a.ver
@@ -27,7 +27,7 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -shared -o $t/c.so -Wl,-version-script,$t/a.ver $t/b.o
+clang -fuse-ld=$2 -shared -o $t/c.so -Wl,-version-script,$t/a.ver $t/b.o
 
 readelf --dyn-syms $t/c.so > $t/log
 fgrep -q _ZN3foo3barE $t/log

@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -o $t/a.o -c -x assembler -
@@ -23,17 +23,17 @@ EOF
 rm -f $t/d.a
 ar cr $t/d.a $t/b.o $t/c.o
 
-$1 -static -o $t/exe $t/a.o $t/d.a
+$2 -static -o $t/exe $t/a.o $t/d.a
 readelf --symbols $t/exe > $t/log
 ! grep -q foo $t/log || false
 ! grep -q bar $t/log || false
 
-$1 -static -o $t/exe $t/a.o $t/d.a -u foo
+$2 -static -o $t/exe $t/a.o $t/d.a -u foo
 readelf --symbols $t/exe > $t/log
 grep -q foo $t/log
 ! grep -q bar $t/log || false
 
-$1 -static -o $t/exe $t/a.o $t/d.a -u foo --undefined=bar
+$2 -static -o $t/exe $t/a.o $t/d.a -u foo --undefined=bar
 readelf --symbols $t/exe > $t/log
 grep -q foo $t/log
 grep -q bar $t/log

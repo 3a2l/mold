@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -c -o $t/a.o -ffunction-sections -fdata-sections -xc -
@@ -31,7 +31,7 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o -Wl,-icf
+clang -fuse-ld=$2 -o $t/exe $t/a.o -Wl,-icf
 $t/exe | grep -q '1 0'
 
 echo OK

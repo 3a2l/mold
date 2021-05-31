@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF > $t/a.cc
@@ -26,7 +26,7 @@ int main() {
 }
 EOF
 
-cflags="-ffunction-sections -fdata-sections -fuse-ld=$1"
+cflags="-ffunction-sections -fdata-sections -fuse-ld=$2"
 
 clang++ -o $t/exe1 $t/a.cc $cflags
 readelf --symbols $t/exe1 > $t/log.1

@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | gcc -fPIC -mtls-dialect=gnu2 -c -o $t/a.o -xc -
@@ -27,18 +27,18 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o $t/b.o
+clang -fuse-ld=$2 -o $t/exe $t/a.o $t/b.o
 $t/exe | grep -q 42
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o $t/b.o -Wl,-no-relax
+clang -fuse-ld=$2 -o $t/exe $t/a.o $t/b.o -Wl,-no-relax
 $t/exe | grep -q 42
 
-clang -fuse-ld=$1 -shared -o $t/c.so $t/a.o
-clang -fuse-ld=$1 -o $t/exe $t/b.o $t/c.so
+clang -fuse-ld=$2 -shared -o $t/c.so $t/a.o
+clang -fuse-ld=$2 -o $t/exe $t/b.o $t/c.so
 $t/exe | grep -q 42
 
-clang -fuse-ld=$1 -shared -o $t/c.so $t/a.o -Wl,-no-relax
-clang -fuse-ld=$1 -o $t/exe $t/b.o $t/c.so -Wl,-no-relax
+clang -fuse-ld=$2 -shared -o $t/c.so $t/a.o -Wl,-no-relax
+clang -fuse-ld=$2 -o $t/exe $t/b.o $t/c.so -Wl,-no-relax
 $t/exe | grep -q 42
 
 echo OK

@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | clang -o $t/a.o -c -x assembler -Wa,-mrelax-relocations=yes -
@@ -36,7 +36,7 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o $t/b.o
+clang -fuse-ld=$2 -o $t/exe $t/a.o $t/b.o
 objdump -d $t/exe | grep -A20 '<bar>:' > $t/log
 
 grep -Pq 'lea \s*0x.+\(%rip\),%rax .*<foo>' $t/log
@@ -57,7 +57,7 @@ grep -Pq 'lea \s*0x.+\(%rip\),%r15 .*<foo>' $t/log
 grep -Pq 'callq.*<foo>' $t/log
 grep -Pq 'jmpq.*<foo>' $t/log
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o $t/b.o -Wl,-no-relax
+clang -fuse-ld=$2 -o $t/exe $t/a.o $t/b.o -Wl,-no-relax
 objdump -d $t/exe | grep -A20 '<bar>:' > $t/log
 
 grep -Pq 'mov \s*0x.+\(%rip\),%rax' $t/log

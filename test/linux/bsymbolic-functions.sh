@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -c -o $t/a.o -fPIC -xc -
@@ -17,7 +17,7 @@ void *bar() {
 }
 EOF
 
-clang -fuse-ld=$1 -shared -o $t/b.so $t/a.o -Wl,-Bsymbolic-functions
+clang -fuse-ld=$2 -shared -o $t/b.so $t/a.o -Wl,-Bsymbolic-functions
 
 cat <<EOF | cc -c -o $t/c.o -xc - -fno-PIE
 #include <stdio.h>
@@ -32,7 +32,7 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -no-pie -o $t/exe $t/c.o $t/b.so
+clang -fuse-ld=$2 -no-pie -o $t/exe $t/c.o $t/b.so
 $t/exe | grep -q '3 3 0'
 
 echo OK

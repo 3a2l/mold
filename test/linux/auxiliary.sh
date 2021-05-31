@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -o $t/a.o -c -x assembler -
@@ -12,7 +12,7 @@ _start:
   nop
 EOF
 
-$1 -o $t/b.so $t/a.o -auxiliary foo -f bar -shared
+$2 -o $t/b.so $t/a.o -auxiliary foo -f bar -shared
 
 readelf --dynamic $t/b.so > $t/log
 fgrep -q 'Auxiliary library: [foo]' $t/log

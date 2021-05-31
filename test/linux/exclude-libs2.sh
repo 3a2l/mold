@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | clang -x assembler -c -o $t/a.o -
@@ -20,7 +20,7 @@ int foo() {
 }
 EOF
 
-clang -fuse-ld=$1 -shared -o $t/d.so $t/c.o $t/b.a -Wl,-exclude-libs=b.a
+clang -fuse-ld=$2 -shared -o $t/d.so $t/c.o $t/b.a -Wl,-exclude-libs=b.a
 readelf --dyn-syms $t/d.so > $t/log
 fgrep -q foo $t/log
 

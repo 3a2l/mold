@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -ftls-model=local-dynamic -fPIC -c -o $t/a.o -xc -
@@ -26,10 +26,10 @@ cat <<EOF | cc -ftls-model=local-dynamic -fPIC -c -o $t/b.o -xc -
 _Thread_local int foo = 3;
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o $t/b.o
+clang -fuse-ld=$2 -o $t/exe $t/a.o $t/b.o
 $t/exe | grep -q '3 5 3 5'
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o $t/b.o -Wl,-no-relax
+clang -fuse-ld=$2 -o $t/exe $t/a.o $t/b.o -Wl,-no-relax
 $t/exe | grep -q '3 5 3 5'
 
 echo OK

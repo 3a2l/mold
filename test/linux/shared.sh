@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | clang -fPIC -c -o $t/a.o -x assembler -
@@ -14,7 +14,7 @@ fn3:
   nop
 EOF
 
-clang -shared -fuse-ld=$1 -o $t/b.so $t/a.o
+clang -shared -fuse-ld=$2 -o $t/b.so $t/a.o
 
 readelf --dyn-syms $t/b.so > $t/log
 
@@ -36,7 +36,7 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/c.o $t/b.so
+clang -fuse-ld=$2 -o $t/exe $t/c.o $t/b.so
 $t/exe | grep -q hello
 ! readelf --symbols $t/exe | grep -q fn3 || false
 

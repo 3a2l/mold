@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<'EOF' | cc -fPIC -c -o $t/a.o -x assembler -
@@ -42,9 +42,9 @@ main:
   ret
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -no-pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -no-pie
 $t/exe | grep -q 42
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -pie
 $t/exe | grep -q 42
 
 # GOT
@@ -57,9 +57,9 @@ main:
   ret
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -no-pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -no-pie
 $t/exe | grep -q 56
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -pie
 $t/exe | grep -q 56
 
 # Copyrel
@@ -71,9 +71,9 @@ main:
   ret
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -no-pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -no-pie
 $t/exe | grep -q 56
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -pie
 $t/exe | grep -q 56
 
 # Copyrel
@@ -90,9 +90,9 @@ foo:
   .quad ext_var
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -no-pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -no-pie
 $t/exe | grep -q 56
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -pie
 $t/exe | grep -q 56
 
 # PLT
@@ -104,9 +104,9 @@ main:
   ret
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -no-pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -no-pie
 $t/exe | grep -q 76
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -pie
 $t/exe | grep -q 76
 
 # PLT
@@ -119,9 +119,9 @@ main:
   ret
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -no-pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -no-pie
 $t/exe | grep -q 76
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s -pie
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s -pie
 $t/exe | grep -q 76
 
 # SIZE32
@@ -139,7 +139,7 @@ main:
 foo:
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s
 $t/exe | grep -q 26
 
 # SIZE64
@@ -157,7 +157,7 @@ main:
 foo:
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/d.s
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/d.s
 $t/exe | grep -q 61
 
 # GOTPCREL64
@@ -171,7 +171,7 @@ int main() {
 EOF
 
 clang -c -o $t/e.o $t/e.c -mcmodel=large -fPIC
-clang -fuse-ld=$1 -o $t/exe $t/c.so $t/e.o
+clang -fuse-ld=$2 -o $t/exe $t/c.so $t/e.o
 $t/exe | grep -q 56
 
 # R_X86_64_32 against non-alloc section
@@ -192,7 +192,7 @@ bar:
 EOF
 
 clang -c -o $t/f.o $t/f.s
-clang -fuse-ld=$1 -o $t/exe $t/f.o
+clang -fuse-ld=$2 -o $t/exe $t/f.o
 readelf -x .foo -x .bar $t/exe > $t/log
 
 fgrep -q '0x00000010 00000000 00000000 10000000 00000000' $t/log

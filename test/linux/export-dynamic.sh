@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -o $t/a.o -c -x assembler -
@@ -20,7 +20,7 @@ _start:
 EOF
 
 cc -shared -fPIC -o $t/b.so -xc /dev/null
-$1 -o $t/exe $t/a.o $t/b.so --export-dynamic
+$2 -o $t/exe $t/a.o $t/b.so --export-dynamic
 
 readelf --dyn-syms $t/exe > $t/log
 fgrep -q 'NOTYPE  GLOBAL DEFAULT    6 bar' $t/log

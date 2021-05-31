@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | clang -c -o $t/a.o -xc -
@@ -37,13 +37,13 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o $t/b.o
+clang -fuse-ld=$2 -o $t/exe $t/a.o $t/b.o
 $t/exe | grep -q '^foo$'
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o $t/b.o -Wl,-wrap,foo
+clang -fuse-ld=$2 -o $t/exe $t/a.o $t/b.o -Wl,-wrap,foo
 $t/exe | grep -q '^wrap_foo$'
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o $t/c.o -Wl,-wrap,foo
+clang -fuse-ld=$2 -o $t/exe $t/a.o $t/c.o -Wl,-wrap,foo
 $t/exe | grep -q '^foo$'
 
 echo OK

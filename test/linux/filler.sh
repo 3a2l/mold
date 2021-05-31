@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -o $t/a.o -c -x assembler -
@@ -20,7 +20,7 @@ msg:
   .string "Hello world\n"
 EOF
 
-$1 -static --filler 0xfe -o $t/exe \
+$2 -static --filler 0xfe -o $t/exe \
   /usr/lib/x86_64-linux-gnu/crt1.o \
   /usr/lib/x86_64-linux-gnu/crti.o \
   /usr/lib/gcc/x86_64-linux-gnu/9/crtbeginT.o \
@@ -34,7 +34,7 @@ $1 -static --filler 0xfe -o $t/exe \
 sed -i -e 's/--filler 0xfe/--filler 0x00/' $t/exe
 hexdump -C $t/exe > $t/txt1
 
-$1 -static --filler 0x00 -o $t/exe \
+$2 -static --filler 0x00 -o $t/exe \
   /usr/lib/x86_64-linux-gnu/crt1.o \
   /usr/lib/x86_64-linux-gnu/crti.o \
   /usr/lib/gcc/x86_64-linux-gnu/9/crtbeginT.o \

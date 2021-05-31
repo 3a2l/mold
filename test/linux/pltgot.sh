@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | clang -fPIC -shared -o $t/a.so -x assembler -
@@ -22,7 +22,7 @@ _start:
   ret
 EOF
 
-$1 -o $t/exe $t/b.o $t/a.so
+$2 -o $t/exe $t/b.o $t/a.so
 
 objdump -d -j .plt.got $t/exe > $t/log
 

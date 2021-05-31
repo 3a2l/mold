@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -o $t/a.o -c -x assembler -
@@ -20,13 +20,13 @@ cat <<EOF | cc -o $t/c.so -shared -fPIC -Wl,-soname,libbar.so -xc -
 int fn2() { return 42; }
 EOF
 
-$1 -o $t/exe $t/a.o $t/b.so $t/c.so
+$2 -o $t/exe $t/a.o $t/b.so $t/c.so
 
 readelf --dynamic $t/exe > $t/readelf
 fgrep -q 'Shared library: [libfoo.so]' $t/readelf
 fgrep -q 'Shared library: [libbar.so]' $t/readelf
 
-$1 -o $t/exe $t/a.o --as-needed $t/b.so $t/c.so
+$2 -o $t/exe $t/a.o --as-needed $t/b.so $t/c.so
 
 readelf --dynamic $t/exe > $t/readelf
 fgrep -q 'Shared library: [libfoo.so]' $t/readelf

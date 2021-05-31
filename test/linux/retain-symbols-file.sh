@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | clang -c -o $t/a.o -xc -
@@ -17,7 +17,7 @@ foo
 baz
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o \
+clang -fuse-ld=$2 -o $t/exe $t/a.o \
   -Wl,--retain-symbols-file=$t/symbols
 readelf --symbols $t/exe > $t/log
 

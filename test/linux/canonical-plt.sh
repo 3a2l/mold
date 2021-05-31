@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -o $t/a.so -fPIC -shared -xc -
@@ -21,7 +21,7 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/a.so $t/b.o
+clang -fuse-ld=$2 -o $t/exe $t/a.so $t/b.o
 $t/exe | grep -q 1
 
 echo OK

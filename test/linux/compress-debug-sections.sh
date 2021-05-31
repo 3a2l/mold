@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | clang -c -g -o $t/a.o -xc -
@@ -14,7 +14,7 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/a.o -Wl,--compress-debug-sections=zlib
+clang -fuse-ld=$2 -o $t/exe $t/a.o -Wl,--compress-debug-sections=zlib
 dwarfdump $t/exe > $t/log
 grep -q '.debug_info SHF_COMPRESSED' $t/log
 grep -q '.debug_str SHF_COMPRESSED' $t/log

@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF > $t/a.ver
@@ -30,7 +30,7 @@ baz:
   ret
 EOF
 
-clang -fuse-ld=$1 -shared -o $t/c.so -Wl,-version-script,$t/a.ver $t/b.s
+clang -fuse-ld=$2 -shared -o $t/c.so -Wl,-version-script,$t/a.ver $t/b.s
 
 cat <<EOF | clang -xc -c -o $t/d.o -
 int foo();
@@ -45,7 +45,7 @@ int main() {
 }
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/d.o $t/c.so
+clang -fuse-ld=$2 -o $t/exe $t/d.o $t/c.so
 $t/exe
 
 readelf --dyn-syms $t/exe > $t/log

@@ -1,8 +1,4 @@
-*.o
-*.so
 *~
-/mold
-/test/linux/tmp
 options.inc
 core
 ld

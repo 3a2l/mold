@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -o $t/a.o -c -xc -fno-PIE -
@@ -19,7 +19,7 @@ const char readonly[100] = "abc";
 char readwrite[100] = "abc";
 EOF
 
-clang -fuse-ld=$1 $t/a.o $t/b.so -o $t/exe
+clang -fuse-ld=$2 $t/a.o $t/b.so -o $t/exe
 readelf -a $t/exe > $t/log
 
 fgrep -q '[21] .dynbss.rel.ro' $t/log

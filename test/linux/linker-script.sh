@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | cc -o $t/a.o -c -x assembler -
@@ -24,13 +24,13 @@ cat <<EOF > $t/script
 GROUP($t/a.o)
 EOF
 
-clang -fuse-ld=$1 -o $t/exe $t/script
+clang -fuse-ld=$2 -o $t/exe $t/script
 $t/exe | grep -q 'Hello world'
 
-clang -fuse-ld=$1 -o $t/exe -Wl,-T,$t/script
+clang -fuse-ld=$2 -o $t/exe -Wl,-T,$t/script
 $t/exe | grep -q 'Hello world'
 
-clang -fuse-ld=$1 -o $t/exe -Wl,--script,$t/script
+clang -fuse-ld=$2 -o $t/exe -Wl,--script,$t/script
 $t/exe | grep -q 'Hello world'
 
 echo OK

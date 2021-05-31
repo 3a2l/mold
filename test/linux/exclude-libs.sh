@@ -2,7 +2,7 @@
 set -e
 cd $(dirname $0)
 echo -n "Testing $(basename -s .sh $0) ... "
-t=$(pwd)/tmp/$(basename -s .sh $0)
+t=$1/tmp/$(basename -s .sh $0)
 mkdir -p $t
 
 cat <<EOF | clang -x assembler -c -o $t/a.o -
@@ -34,25 +34,25 @@ int baz() {
 }
 EOF
 
-clang -fuse-ld=$1 -shared -o $t/f.so $t/e.o $t/c.a $t/d.a
+clang -fuse-ld=$2 -shared -o $t/f.so $t/e.o $t/c.a $t/d.a
 readelf --dyn-syms $t/f.so > $t/log
 fgrep -q foo $t/log
 fgrep -q bar $t/log
 fgrep -q baz $t/log
 
-clang -fuse-ld=$1 -shared -o $t/f.so $t/e.o $t/c.a $t/d.a -Wl,-exclude-libs=c.a
+clang -fuse-ld=$2 -shared -o $t/f.so $t/e.o $t/c.a $t/d.a -Wl,-exclude-libs=c.a
 readelf --dyn-syms $t/f.so > $t/log
 ! fgrep -q foo $t/log || false
 fgrep -q bar $t/log
 fgrep -q baz $t/log
 
-clang -fuse-ld=$1 -shared -o $t/f.so $t/e.o $t/c.a $t/d.a -Wl,-exclude-libs=c.a -Wl,-exclude-libs=d.a
+clang -fuse-ld=$2 -shared -o $t/f.so $t/e.o $t/c.a $t/d.a -Wl,-exclude-libs=c.a -Wl,-exclude-libs=d.a
 readelf --dyn-syms $t/f.so > $t/log
 ! fgrep -q foo $t/log || false
 ! fgrep -q bar $t/log || false
 fgrep -q baz $t/log
 
-clang -fuse-ld=$1 -shared -o $t/f.so $t/e.o $t/c.a $t/d.a -Wl,-exclude-libs=ALL
+clang -fuse-ld=$2 -shared -o $t/f.so $t/e.o $t/c.a $t/d.a -Wl,-exclude-libs=ALL
 readelf --dyn-syms $t/f.so > $t/log
 ! fgrep -q foo $t/log || false
 ! fgrep -q bar $t/log || false
