@@ -304,7 +304,7 @@ void sort_init_fini(Context<E> &ctx) {
 
   auto get_priority = [](InputSection<E> *isec) {
     static std::regex re(R"(_array\.(\d+)$)");
-    std::string name = isec->name().begin();
+    std::string name(isec->name());
     std::smatch m;
     if (std::regex_search(name, m, re))
       return std::stoi(m[1]);

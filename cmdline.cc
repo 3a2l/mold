@@ -4,8 +4,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <tbb/global_control.h>
-#include <unistd.h>
 #include <unordered_set>
+
+#ifndef WIN32
+#   include <unistd.h>
+#endif
 
 #include <tbb/global_control.h>
 
