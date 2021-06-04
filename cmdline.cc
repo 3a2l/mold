@@ -467,167 +467,167 @@ void parse_nonpositional_args(Context<E> &ctx,
     } else if (read_flag(args, "static") || read_flag(args, "Bstatic")) {
         ctx.arg.is_static = true;
         remaining.push_back("-Bstatic");
-    //} else if (read_flag(args, "Bdynamic")) {
-    //  ctx.arg.is_static = false;
-    //  remaining.push_back("-Bdynamic");
-    //} else if (read_flag(args, "shared") || read_flag(args, "Bshareable")) {
-    //  ctx.arg.shared = true;
-    //} else if (read_arg(ctx, args, arg, "spare-dynamic-tags")) {
-    //  ctx.arg.spare_dynamic_tags = parse_number(ctx, "spare-dynamic-tags", arg);
-    //} else if (read_flag(args, "demangle")) {
-    //  ctx.arg.demangle = true;
-    //} else if (read_flag(args, "no-demangle")) {
-    //  ctx.arg.demangle = false;
-    //} else if (read_arg(ctx, args, arg, "y") ||
-    //           read_arg(ctx, args, arg, "trace-symbol")) {
-    //  ctx.arg.trace_symbol.push_back(arg);
-    //} else if (read_arg(ctx, args, arg, "filler")) {
-    //  ctx.arg.filler = parse_hex(ctx, "filler", arg);
-    //} else if (read_arg(ctx, args, arg, "L") ||
-    //           read_arg(ctx, args, arg, "library-path")) {
-    //  ctx.arg.library_paths.push_back(arg);
-    //} else if (read_arg(ctx, args, arg, "sysroot")) {
-    //  ctx.arg.sysroot = arg;
-    //} else if (read_arg(ctx, args, arg, "u") ||
-    //           read_arg(ctx, args, arg, "undefined")) {
-    //  ctx.arg.undefined.push_back(arg);
-    //} else if (read_arg(ctx, args, arg, "init")) {
-    //  ctx.arg.init = arg;
-    //} else if (read_arg(ctx, args, arg, "fini")) {
-    //  ctx.arg.fini = arg;
-    //} else if (read_arg(ctx, args, arg, "hash-style")) {
-    //  if (arg == "sysv") {
-    //    ctx.arg.hash_style_sysv = true;
-    //    ctx.arg.hash_style_gnu = false;
-    //  } else if (arg == "gnu") {
-    //    ctx.arg.hash_style_sysv = false;
-    //    ctx.arg.hash_style_gnu = true;
-    //  } else if (arg == "both") {
-    //    ctx.arg.hash_style_sysv = true;
-    //    ctx.arg.hash_style_gnu = true;
-    //  } else {
-    //    Fatal(ctx) << "invalid --hash-style argument: " << arg;
-    //  }
-    //} else if (read_arg(ctx, args, arg, "soname") ||
-    //           read_arg(ctx, args, arg, "h")) {
-    //  ctx.arg.soname = arg;
-    //} else if (read_flag(args, "allow-multiple-definition")) {
-    //  ctx.arg.allow_multiple_definition = true;
-    //} else if (read_flag(args, "trace")) {
-    //  ctx.arg.trace = true;
-    //} else if (read_flag(args, "eh-frame-hdr")) {
-    //  ctx.arg.eh_frame_hdr = true;
-    //} else if (read_flag(args, "no-eh-frame-hdr")) {
-    //  ctx.arg.eh_frame_hdr = false;
-    //} else if (read_flag(args, "pie") || read_flag(args, "pic-executable")) {
-    //  ctx.arg.pic = true;
-    //  ctx.arg.pie = true;
-    //} else if (read_flag(args, "no-pie") ||
-    //           read_flag(args, "no-pic-executable")) {
-    //  ctx.arg.pic = false;
-    //  ctx.arg.pie = false;
-    //} else if (read_flag(args, "relax")) {
-    //  ctx.arg.relax = true;
-    //} else if (read_flag(args, "no-relax")) {
-    //  ctx.arg.relax = false;
+    } else if (read_flag(args, "Bdynamic")) {
+     ctx.arg.is_static = false;
+     remaining.push_back("-Bdynamic");
+    } else if (read_flag(args, "shared") || read_flag(args, "Bshareable")) {
+     ctx.arg.shared = true;
+    } else if (read_arg(ctx, args, arg, "spare-dynamic-tags")) {
+     ctx.arg.spare_dynamic_tags = parse_number(ctx, "spare-dynamic-tags", arg);
+    } else if (read_flag(args, "demangle")) {
+     ctx.arg.demangle = true;
+    } else if (read_flag(args, "no-demangle")) {
+     ctx.arg.demangle = false;
+    } else if (read_arg(ctx, args, arg, "y") ||
+              read_arg(ctx, args, arg, "trace-symbol")) {
+     ctx.arg.trace_symbol.push_back(arg);
+    } else if (read_arg(ctx, args, arg, "filler")) {
+     ctx.arg.filler = parse_hex(ctx, "filler", arg);
+    } else if (read_arg(ctx, args, arg, "L") ||
+              read_arg(ctx, args, arg, "library-path")) {
+     ctx.arg.library_paths.push_back(arg);
+    } else if (read_arg(ctx, args, arg, "sysroot")) {
+     ctx.arg.sysroot = arg;
+    } else if (read_arg(ctx, args, arg, "u") ||
+              read_arg(ctx, args, arg, "undefined")) {
+     ctx.arg.undefined.push_back(arg);
+    } else if (read_arg(ctx, args, arg, "init")) {
+     ctx.arg.init = arg;
+    } else if (read_arg(ctx, args, arg, "fini")) {
+     ctx.arg.fini = arg;
+    } else if (read_arg(ctx, args, arg, "hash-style")) {
+     if (arg == "sysv") {
+       ctx.arg.hash_style_sysv = true;
+       ctx.arg.hash_style_gnu = false;
+     } else if (arg == "gnu") {
+       ctx.arg.hash_style_sysv = false;
+       ctx.arg.hash_style_gnu = true;
+     } else if (arg == "both") {
+       ctx.arg.hash_style_sysv = true;
+       ctx.arg.hash_style_gnu = true;
+     } else {
+       Fatal(ctx) << "invalid --hash-style argument: " << arg;
+     }
+    } else if (read_arg(ctx, args, arg, "soname") ||
+              read_arg(ctx, args, arg, "h")) {
+     ctx.arg.soname = arg;
+    } else if (read_flag(args, "allow-multiple-definition")) {
+     ctx.arg.allow_multiple_definition = true;
+    } else if (read_flag(args, "trace")) {
+     ctx.arg.trace = true;
+    } else if (read_flag(args, "eh-frame-hdr")) {
+     ctx.arg.eh_frame_hdr = true;
+    } else if (read_flag(args, "no-eh-frame-hdr")) {
+     ctx.arg.eh_frame_hdr = false;
+    } else if (read_flag(args, "pie") || read_flag(args, "pic-executable")) {
+     ctx.arg.pic = true;
+     ctx.arg.pie = true;
+    } else if (read_flag(args, "no-pie") ||
+              read_flag(args, "no-pic-executable")) {
+     ctx.arg.pic = false;
+     ctx.arg.pie = false;
+    } else if (read_flag(args, "relax")) {
+     ctx.arg.relax = true;
+    } else if (read_flag(args, "no-relax")) {
+     ctx.arg.relax = false;
     } else if (read_flag(args, "perf")) {
       ctx.arg.perf = true;
-    //} else if (read_flag(args, "stats")) {
-    //  ctx.arg.stats = true;
-    //  Counter::enabled = true;
-    //} else if (read_arg(ctx, args, arg, "C") ||
-    //           read_arg(ctx, args, arg, "directory")) {
-    //  ctx.arg.directory = arg;
-    //} else if (read_arg(ctx, args, arg, "chroot")) {
-    //  ctx.arg.chroot = arg;
-    //} else if (read_flag(args, "warn-common")) {
-    //  ctx.arg.warn_common = true;
-    //} else if (read_flag(args, "no-warn-common")) {
-    //  ctx.arg.warn_common = false;
-    //} else if (read_arg(ctx, args, arg, "compress-debug-sections")) {
-    //  if (arg == "zlib" || arg == "zlib-gabi")
-    //    ctx.arg.compress_debug_sections = true;
-    //  else if (arg == "none")
-    //    ctx.arg.compress_debug_sections = false;
-    //  else
-    //    Fatal(ctx) << "invalid --compress-debug-sections argument: " << arg;
-    //} else if (read_arg(ctx, args, arg, "wrap")) {
-    //  ctx.arg.wrap.insert(arg);
-    //} else if (read_flag(args, "omagic") || read_flag(args, "N")) {
-    //  ctx.arg.omagic = true;
-    //  ctx.arg.is_static = true;
-    //} else if (read_flag(args, "no-omagic")) {
-    //  ctx.arg.omagic = false;
-    //} else if (read_arg(ctx, args, arg, "retain-symbols-file")) {
-    //  read_retain_symbols_file(ctx, arg);
-    //} else if (read_flag(args, "repro")) {
-    //  ctx.arg.repro = true;
-    //} else if (read_z_flag(args, "now")) {
-    //  ctx.arg.z_now = true;
-    //} else if (read_z_flag(args, "lazy")) {
-    //  ctx.arg.z_now = false;
-    //} else if (read_z_flag(args, "execstack")) {
-    //  ctx.arg.z_execstack = true;
-    //} else if (read_z_flag(args, "noexecstack")) {
-    //  ctx.arg.z_execstack = false;
-    //} else if (read_z_flag(args, "relro")) {
-    //  ctx.arg.z_relro = true;
-    //} else if (read_z_flag(args, "norelro")) {
-    //  ctx.arg.z_relro = false;
-    //} else if (read_z_flag(args, "defs")) {
-    //  ctx.arg.z_defs = true;
-    //} else if (read_z_flag(args, "nodefs")) {
-    //  ctx.arg.z_defs = false;
-    //} else if (read_z_flag(args, "nodlopen")) {
-    //  ctx.arg.z_dlopen = false;
-    //} else if (read_z_flag(args, "nodelete")) {
-    //  ctx.arg.z_delete = false;
-    //} else if (read_z_flag(args, "nocopyreloc")) {
-    //  ctx.arg.z_copyreloc = false;
-    //} else if (read_z_flag(args, "initfirst")) {
-    //  ctx.arg.z_initfirst = true;
-    //} else if (read_z_flag(args, "interpose")) {
-    //  ctx.arg.z_interpose = true;
-    //} else if (read_flag(args, "no-undefined")) {
-    //  ctx.arg.z_defs = true;
-    //} else if (read_flag(args, "fatal-warnings")) {
-    //  ctx.arg.fatal_warnings = true;
-    //} else if (read_flag(args, "no-fatal-warnings")) {
-    //  ctx.arg.fatal_warnings = false;
-    //} else if (read_flag(args, "fork")) {
-    //  ctx.arg.fork = true;
+    } else if (read_flag(args, "stats")) {
+     ctx.arg.stats = true;
+     Counter::enabled = true;
+    } else if (read_arg(ctx, args, arg, "C") ||
+              read_arg(ctx, args, arg, "directory")) {
+     ctx.arg.directory = arg;
+    } else if (read_arg(ctx, args, arg, "chroot")) {
+     ctx.arg.chroot = arg;
+    } else if (read_flag(args, "warn-common")) {
+     ctx.arg.warn_common = true;
+    } else if (read_flag(args, "no-warn-common")) {
+     ctx.arg.warn_common = false;
+    } else if (read_arg(ctx, args, arg, "compress-debug-sections")) {
+     if (arg == "zlib" || arg == "zlib-gabi")
+       ctx.arg.compress_debug_sections = true;
+     else if (arg == "none")
+       ctx.arg.compress_debug_sections = false;
+     else
+       Fatal(ctx) << "invalid --compress-debug-sections argument: " << arg;
+    } else if (read_arg(ctx, args, arg, "wrap")) {
+     ctx.arg.wrap.insert(arg);
+    } else if (read_flag(args, "omagic") || read_flag(args, "N")) {
+     ctx.arg.omagic = true;
+     ctx.arg.is_static = true;
+    } else if (read_flag(args, "no-omagic")) {
+     ctx.arg.omagic = false;
+    } else if (read_arg(ctx, args, arg, "retain-symbols-file")) {
+     read_retain_symbols_file(ctx, arg);
+    } else if (read_flag(args, "repro")) {
+     ctx.arg.repro = true;
+    } else if (read_z_flag(args, "now")) {
+     ctx.arg.z_now = true;
+    } else if (read_z_flag(args, "lazy")) {
+     ctx.arg.z_now = false;
+    } else if (read_z_flag(args, "execstack")) {
+     ctx.arg.z_execstack = true;
+    } else if (read_z_flag(args, "noexecstack")) {
+     ctx.arg.z_execstack = false;
+    } else if (read_z_flag(args, "relro")) {
+     ctx.arg.z_relro = true;
+    } else if (read_z_flag(args, "norelro")) {
+     ctx.arg.z_relro = false;
+    } else if (read_z_flag(args, "defs")) {
+     ctx.arg.z_defs = true;
+    } else if (read_z_flag(args, "nodefs")) {
+     ctx.arg.z_defs = false;
+    } else if (read_z_flag(args, "nodlopen")) {
+     ctx.arg.z_dlopen = false;
+    } else if (read_z_flag(args, "nodelete")) {
+     ctx.arg.z_delete = false;
+    } else if (read_z_flag(args, "nocopyreloc")) {
+     ctx.arg.z_copyreloc = false;
+    } else if (read_z_flag(args, "initfirst")) {
+     ctx.arg.z_initfirst = true;
+    } else if (read_z_flag(args, "interpose")) {
+     ctx.arg.z_interpose = true;
+    } else if (read_flag(args, "no-undefined")) {
+     ctx.arg.z_defs = true;
+    } else if (read_flag(args, "fatal-warnings")) {
+     ctx.arg.fatal_warnings = true;
+    } else if (read_flag(args, "no-fatal-warnings")) {
+     ctx.arg.fatal_warnings = false;
+    } else if (read_flag(args, "fork")) {
+     ctx.arg.fork = true;
     } else if (read_flag(args, "no-fork")) {
       ctx.arg.fork = false;
-    //} else if (read_flag(args, "gc-sections")) {
-    //  ctx.arg.gc_sections = true;
-    //} else if (read_flag(args, "no-gc-sections")) {
-    //  ctx.arg.gc_sections = false;
-    //} else if (read_flag(args, "print-gc-sections")) {
-    //  ctx.arg.print_gc_sections = true;
-    //} else if (read_flag(args, "no-print-gc-sections")) {
-    //  ctx.arg.print_gc_sections = false;
+    } else if (read_flag(args, "gc-sections")) {
+     ctx.arg.gc_sections = true;
+    } else if (read_flag(args, "no-gc-sections")) {
+     ctx.arg.gc_sections = false;
+    } else if (read_flag(args, "print-gc-sections")) {
+     ctx.arg.print_gc_sections = true;
+    } else if (read_flag(args, "no-print-gc-sections")) {
+     ctx.arg.print_gc_sections = false;
     } else if (read_flag(args, "icf")) {
       ctx.arg.icf = true;
     } else if (read_flag(args, "no-icf")) {
       ctx.arg.icf = false;
-    //} else if (read_arg(ctx, args, arg, "image-base")) {
-    //  ctx.arg.image_base = parse_number(ctx, "image-base", arg);
-    //} else if (read_flag(args, "quick-exit")) {
-    //  ctx.arg.quick_exit = true;
-    //} else if (read_flag(args, "no-quick-exit")) {
-    //  ctx.arg.quick_exit = false;
+    } else if (read_arg(ctx, args, arg, "image-base")) {
+     ctx.arg.image_base = parse_number(ctx, "image-base", arg);
+    } else if (read_flag(args, "quick-exit")) {
+     ctx.arg.quick_exit = true;
+    } else if (read_flag(args, "no-quick-exit")) {
+     ctx.arg.quick_exit = false;
     } else if (read_flag(args, "print-icf-sections")) {
       ctx.arg.print_icf_sections = true;
-    //} else if (read_flag(args, "no-print-icf-sections")) {
-    //  ctx.arg.print_icf_sections = false;
-    //} else if (read_flag(args, "quick-exit")) {
-    //  ctx.arg.quick_exit = true;
-    //} else if (read_flag(args, "no-quick-exit")) {
-    //  ctx.arg.quick_exit = false;
-    //} else if (read_arg(ctx, args, arg, "thread-count")) {
-    //  ctx.arg.thread_count = parse_number(ctx, "thread-count", arg);
-    //} else if (read_flag(args, "threads")) {
-    //  ctx.arg.thread_count = get_default_thread_count();
+    } else if (read_flag(args, "no-print-icf-sections")) {
+     ctx.arg.print_icf_sections = false;
+    } else if (read_flag(args, "quick-exit")) {
+     ctx.arg.quick_exit = true;
+    } else if (read_flag(args, "no-quick-exit")) {
+     ctx.arg.quick_exit = false;
+    } else if (read_arg(ctx, args, arg, "thread-count")) {
+     ctx.arg.thread_count = parse_number(ctx, "thread-count", arg);
+    } else if (read_flag(args, "threads")) {
+     ctx.arg.thread_count = get_default_thread_count();
     } else if (read_flag(args, "no-threads")) {
       ctx.arg.thread_count = 1;
     } else if (read_flag(args, "discard-all") || read_flag(args, "x")) {

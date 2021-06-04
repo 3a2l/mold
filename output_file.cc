@@ -1,5 +1,8 @@
 #include "mold.h"
 
+#include <fcntl.h>
+#include <sys/stat.h>
+
 template <typename E>
 class MemoryMappedOutputFile : public OutputFile<E> {
 public:
@@ -13,7 +16,7 @@ public:
     this->buf = (u8*)map_memory(this->tmpfile, MAP_MODE_READWRITE, filesize);
 
     if (this->buf == nullptr)
-        Fatal(ctx) << "MapViewOfFile failed: " << ::GetLastError();
+        Fatal(ctx) << "mapping memory failed: " << strerror(errno);
 #if 0
     // TODO: LINUX
     this->tmpfile = (char *)save_string(ctx, dir + "/.mold-XXXXXX").data();
@@ -65,13 +68,10 @@ public:
   MallocOutputFile(Context<E> &ctx, std::string path, u64 filesize)
     : OutputFile<E>(path, filesize, false) {
       this->buf = (u8*)map_memory(filesize);
-#if 0
-    // TODO: LINUX
-    this->buf = (u8 *)mmap(NULL, filesize, PROT_READ | PROT_WRITE,
-                           MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    if (this->buf == MAP_FAILED)
-      Fatal(ctx) << "mmap failed: " << strerror(errno);
-#endif
+      if (this->buf == nullptr)
+      {
+        Fatal(ctx) << "memory mapping failed: " << strerror(errno);
+      }
   }
 
   void close(Context<E> &ctx) override {

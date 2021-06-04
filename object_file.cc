@@ -1,8 +1,8 @@
 #include "mold.h"
 
 #include <cstring>
-#include <fcntl.h>
 #include <regex>
+#include <sys/stat.h>
 
 #include <zlib.h>
 
@@ -44,18 +44,6 @@ u8 *MemoryMappedFile<E>::data(Context<E> &ctx) {
     return data_;
 
   data_ = (u8*)map_memory(name, MAP_MODE_READ, size_);
-#if 0
-  // TODO: LINUX
-  i64 fd = ::open(name.c_str(), O_RDONLY);
-  if (fd == -1)
-      Fatal(ctx) << name << ": cannot open: " << strerror(errno);
-
-  data_ = (u8 *)mmap(nullptr, size_, PROT_READ, MAP_PRIVATE, fd, 0);
-  if (data_ == MAP_FAILED)
-    Fatal(ctx) << name << ": mmap failed: " << strerror(errno);
-
-  close(fd);
-#endif
   return data_;
 }
 

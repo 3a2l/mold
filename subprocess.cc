@@ -87,7 +87,7 @@ static std::string compute_sha256(std::span<std::string_view> argv) {
   for (std::string_view arg : argv) {
     if (arg != "-preload" && arg != "--preload") {
       update_sha(sha, arg.data(), arg.size());
-      update_sha(sha, { 0 }, 1);
+      update_sha(sha, (char []){ 0 }, 1);
     }
   }
 
@@ -257,16 +257,6 @@ void daemonize(Context<E> &ctx, std::function<void()> *wait_for_client,
 template <typename E>
 static std::string get_self_path(Context<E> &ctx) {
     return get_self_path();
-#if 0
-    // TODO: LINUX
-  char buf[4096];
-  size_t n = readlink("/proc/self/exe", buf, sizeof(buf));
-  if (n == -1)
-    Fatal(ctx) << "readlink(\"/proc/self/exe\") failed: " << strerror(errno);
-  if (n == sizeof(buf))
-    Fatal(ctx) << "readlink: path too long";
-  return {buf, n};
-#endif
 }
 
 template <typename E>
@@ -280,9 +270,9 @@ void process_run_subcommand(Context<E> &ctx, int argc, char **argv) {
   std::string self = get_self_path(ctx);
   std::string dso_path;
   if (self == "/usr/bin/mold")
-    dso_path = "/usr/lib/mold/mold-wrapper.so";
+    dso_path = "/usr/lib/mold/libmold-wrapper.so";
   else if (self == "/usr/local/bin/mold")
-    dso_path = "/usr/local/lib/mold/mold-wrapper.so";
+    dso_path = "/usr/local/lib/mold/libmold-wrapper.so";
   else
     dso_path = std::string(path_dirname(self)) + "/libmold-wrapper.so";
 
