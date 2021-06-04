@@ -53,7 +53,6 @@
 #include "mold.h"
 
 #include <array>
-#include <openssl/sha.h>
 #include <tbb/concurrent_unordered_map.h>
 #include <tbb/concurrent_vector.h>
 #include <tbb/enumerable_thread_specific.h>
@@ -113,10 +112,10 @@ static bool is_eligible(InputSection<E> &isec) {
          !is_empty && !is_init && !is_fini && !is_enumerable;
 }
 
-static Digest digest_final(SHA256_CTX &sha) {
+static
+Digest digest_final(CryptographyContext &sha) {
   u8 buf[SHA256_SIZE];
-  const int result = SHA256_Final(buf, &sha);
-  assert(result == 1);
+  end_sha(sha, buf);
 
   Digest digest;
   memcpy(digest.data(), buf, HASH_SIZE);
@@ -217,18 +216,18 @@ static void merge_leaf_nodes(Context<E> &ctx) {
 
 template <typename E>
 static Digest compute_digest(Context<E> &ctx, InputSection<E> &isec) {
-  SHA256_CTX sha;
-  SHA256_Init(&sha);
+    CryptographyContext sha;
+    begin_sha(sha);
 
   u8 *buf = (u8 *)isec.contents.data();
 
-  auto hash = [&](auto val) {
-    SHA256_Update(&sha, &val, sizeof(val));
+  auto hash = [&](const auto val) {
+      update_sha(sha, &val, sizeof(val));
   };
 
   auto hash_string = [&](std::string_view str) {
     hash(str.size());
-    SHA256_Update(&sha, str.data(), str.size());
+    update_sha(sha, str.data(), str.size());
   };
 
   auto hash_symbol = [&](Symbol<E> &sym) {
@@ -409,15 +408,15 @@ static i64 propagate(std::span<std::vector<Digest>> digests,
     if (digests[slot][i] == digests[!slot][i])
       return;
 
-    SHA256_CTX sha;
-    SHA256_Init(&sha);
-    SHA256_Update(&sha, digests[2][i].data(), HASH_SIZE);
+    CryptographyContext sha;
+    begin_sha(sha);
+    update_sha(sha, digests[2][i].data(), HASH_SIZE);
 
     i64 begin = edge_indices[i];
     i64 end = (i + 1 == num_digests) ? edges.size() : edge_indices[i + 1];
 
     for (i64 j = begin; j < end; j++)
-      SHA256_Update(&sha, digests[slot][edges[j]].data(), HASH_SIZE);
+        update_sha(sha, digests[slot][edges[j]].data(), HASH_SIZE);
 
     digests[!slot][i] = digest_final(sha);
 

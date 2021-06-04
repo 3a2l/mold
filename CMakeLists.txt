@@ -26,11 +26,6 @@ endif()
 # zlib
 add_subdirectory(thirdparty/zlib)
 
-# LibreSSL
-set(LIBRESSL_APPS  OFF CACHE BOOL "Build LibreSSL apps")
-set(LIBRESSL_TESTS OFF CACHE BOOL "Build LibreSSL tests")
-add_subdirectory(thirdparty/libressl-3.3.3)
-
 # oneTBB
 include(thirdparty/oneTBB/cmake/TBBBuild.cmake)
 tbb_build(TBB_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/oneTBB/
@@ -115,13 +110,14 @@ target_link_options(mold
 
 target_link_libraries(mold
     PRIVATE
-        crypto
         TBB::tbb
         zlib
         xxHash::xxhash
+        $<$<PLATFORM_ID:Linux>:crypto>
         $<$<PLATFORM_ID:Linux>:dl>
         $<$<PLATFORM_ID:Linux>:Threads::Threads>
-        $<$<CXX_COMPILER_ID:MSVC>:Dbghelp.lib>)
+        $<$<CXX_COMPILER_ID:MSVC>:Dbghelp>
+        $<$<PLATFORM_ID:Windows>:bcrypt>)
 
 add_dependencies(mold mimalloc-static)
 

@@ -4,12 +4,6 @@
 #include <iomanip>
 #include <ios>
 
-#ifdef WIN32
-#else
-#include <sys/resource.h>
-#include <sys/time.h>
-#endif
-
 i64 Counter::get_value() {
   return values.combine(std::plus());
 }
@@ -24,55 +18,29 @@ void Counter::print() {
               << "=" << c->get_value() << "\n";
 }
 
-static i64 now_nsec() {
-#ifdef WIN32
-    // TODO
-    return -1;
-#else
-  struct timespec t;
-  clock_gettime(CLOCK_MONOTONIC, &t);
-  return (i64)t.tv_sec * 1000000000 + t.tv_nsec;
-#endif
-}
-
-#ifndef WIN32
-static i64 to_nsec(struct timeval t) {
-  return (i64)t.tv_sec * 1000000000 + t.tv_usec * 1000;
-}
-#endif
-
 TimerRecord::TimerRecord(std::string name, TimerRecord *parent)
   : name(name), parent(parent) {
-#ifdef WIN32
-    // TODO
-#else
-  struct rusage usage;
-  getrusage(RUSAGE_SELF, &usage);
 
   start = now_nsec();
-  user = to_nsec(usage.ru_utime);
-  sys = to_nsec(usage.ru_stime);
+  int64_t user_now = 0, sys_now = 0;
+  get_process_times(user_now, sys_now);
+  user = user_now;
+  sys = sys_now;
 
   if (parent)
     parent->children.push_back(this);
-#endif
 }
 
 void TimerRecord::stop() {
-#ifdef WIN32
-    // TODO
-#else
   if (stopped)
     return;
   stopped = true;
 
-  struct rusage usage;
-  getrusage(RUSAGE_SELF, &usage);
-
   end = now_nsec();
-  user = to_nsec(usage.ru_utime) - user;
-  sys = to_nsec(usage.ru_stime) - sys;
-#endif
+  int64_t user_now = 0, sys_now = 0;
+  get_process_times(user_now, sys_now);
+  user = user_now - user;
+  sys = sys_now - sys;
 }
 
 template <typename E>

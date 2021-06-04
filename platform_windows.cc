@@ -3,10 +3,9 @@
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #include <windows.h>
+#include <bcrypt.h>
 
-#include <string>
 #include <assert.h>
-#include <string_view>
 
 constexpr DWORD MAX_PATH_BUFFER_SIZE = MAX_PATH + 1;
 
@@ -120,4 +119,121 @@ void* map_memory(const std::string_view filepath, const MapMode mode, const size
 void unmap_memory(void* address, size_t length) noexcept
 {
     ::UnmapViewOfFile(address);
+}
+
+// Time
+
+int64_t now_nsec() noexcept
+{
+    LARGE_INTEGER counter = { 0 }, frequency = { 0 };
+    ::QueryPerformanceCounter(&counter);
+    ::QueryPerformanceFrequency(&frequency);
+
+    LARGE_INTEGER now = { 0 };
+    now.QuadPart = counter.QuadPart;
+    now.QuadPart *= 1000LL * 1000LL * 1000LL;   // we need the time to be in nanoseconds (10^-9)
+    now.QuadPart /= frequency.QuadPart;
+
+    return now.QuadPart;
+}
+
+void get_process_times(int64_t& user_mode_nsec, int64_t& kernel_mode_nsec) noexcept
+{
+    const HANDLE handle = ::GetCurrentProcess();
+    FILETIME creation_time, exit_time, kernel_time = { 0 }, user_time = { 0 };
+    ::GetProcessTimes(handle, &creation_time, &exit_time, &kernel_time, &user_time);
+
+    const ULARGE_INTEGER user{ user_time.dwLowDateTime, user_time.dwHighDateTime };
+    user_mode_nsec = user.QuadPart * 100;   // user_time is the count of 100-nanosecond time units
+
+    const ULARGE_INTEGER kernel{ kernel_time.dwLowDateTime, kernel_time.dwHighDateTime };
+    kernel_mode_nsec = kernel.QuadPart * 100;   // kernel_time is the count of 100-nanosecond time units
+}
+
+// Cryptography
+
+struct CryptographyContextData
+{
+    BCRYPT_ALG_HANDLE algorithm_handle = nullptr;
+    BCRYPT_HASH_HANDLE hash_handle = nullptr;
+    unsigned char* hash_object = nullptr;
+    unsigned char* hash = nullptr;
+
+    ~CryptographyContextData() noexcept
+    {
+        ::BCryptCloseAlgorithmProvider(algorithm_handle, 0);
+        ::BCryptDestroyHash(hash_handle);
+        ::free(hash_object);
+        ::free(hash);
+    }
+};
+
+CryptographyContext::~CryptographyContext() noexcept
+{
+    auto data = (CryptographyContextData*)this->data;
+    if (data != nullptr)
+        delete data;
+    data = nullptr;
+}
+
+bool sha_256(const void* data, const size_t size, unsigned char* digest) noexcept
+{
+    CryptographyContext sha;
+
+    return (begin_sha(sha) &&
+            update_sha(sha, data, size) &&
+            end_sha(sha, digest));
+}
+
+bool begin_sha(CryptographyContext& ctx) noexcept
+{
+    constexpr int SHA_DIGEST_SIZE = 32;
+
+    ctx.data = new CryptographyContextData();
+    auto ctx_data = (CryptographyContextData*)ctx.data;
+
+    if (!BCRYPT_SUCCESS(::BCryptOpenAlgorithmProvider(&ctx_data->algorithm_handle, BCRYPT_SHA256_ALGORITHM, nullptr, 0)))
+    {
+        return false;
+    }
+
+    DWORD hash_object_size = 0;
+    ULONG copied = 0;
+    if (!BCRYPT_SUCCESS(::BCryptGetProperty(ctx_data->algorithm_handle, BCRYPT_OBJECT_LENGTH,
+                                            (PUCHAR)&hash_object_size, sizeof(hash_object_size),
+                                            &copied, 0)))
+    {
+        return false;
+    }
+    assert(copied != 0);
+    ctx_data->hash_object = (unsigned char*)::malloc(hash_object_size);
+    ctx_data->hash = (unsigned char*)::malloc(SHA_DIGEST_SIZE);
+
+    if (!BCRYPT_SUCCESS(::BCryptCreateHash(ctx_data->algorithm_handle, &ctx_data->hash_handle,
+                                           ctx_data->hash_object, hash_object_size,
+                                           nullptr, 0, 0)))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool update_sha(CryptographyContext& ctx, const void* data, const size_t size) noexcept
+{
+    auto ctx_data = (CryptographyContextData*)ctx.data;
+
+    return BCRYPT_SUCCESS(::BCryptHashData(ctx_data->hash_handle, (PUCHAR)data, size, 0));
+}
+
+bool end_sha(CryptographyContext& ctx, unsigned char* digest) noexcept
+{
+    auto ctx_data = (CryptographyContextData*)ctx.data;
+
+    return BCRYPT_SUCCESS(::BCryptFinishHash(ctx_data->hash_handle, digest, 32, 0));
+}
+
+bool generate_random_bytes(unsigned char* buffer, const size_t size) noexcept
+{
+    return BCRYPT_SUCCESS(::BCryptGenRandom(nullptr, buffer, size, BCRYPT_USE_SYSTEM_PREFERRED_RNG));
 }

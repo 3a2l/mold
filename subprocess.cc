@@ -1,17 +1,14 @@
 #include "mold.h"
 
-#ifdef WIN32
-#else
-#include <sys/signal.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#ifndef WIN32
+#   include <sys/signal.h>
+#   include <sys/socket.h>
+#   include <sys/stat.h>
+#   include <sys/types.h>
+#   include <sys/un.h>
+#   include <sys/wait.h>
+#   include <unistd.h>
 #endif
-
-#include "openssl/sha.h"
 
 #define DAEMON_TIMEOUT 30
 
@@ -84,18 +81,18 @@ static std::string base64(u8 *data, u64 size) {
 }
 
 static std::string compute_sha256(std::span<std::string_view> argv) {
-  SHA256_CTX sha;
-  SHA256_Init(&sha);
+  CryptographyContext sha;
+  begin_sha(sha);
 
   for (std::string_view arg : argv) {
     if (arg != "-preload" && arg != "--preload") {
-      SHA256_Update(&sha, arg.data(), arg.size());
-      SHA256_Update(&sha, { 0 }, 1);
+      update_sha(sha, arg.data(), arg.size());
+      update_sha(sha, { 0 }, 1);
     }
   }
 
   u8 digest[SHA256_SIZE];
-  SHA256_Final(digest, &sha);
+  end_sha(sha, digest);
   return base64(digest, SHA256_SIZE);
 }
 

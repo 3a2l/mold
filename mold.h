@@ -11,10 +11,10 @@
 #include "elf.h"
 
 #ifdef _MSC_VER
-#include <intrin.h>
-#define __builtin_popcount __popcnt64
-#define __builtin_clzl __lzcnt64
-#define unlink _unlink
+#   include <intrin.h>
+#   define __builtin_popcount __popcnt64
+#   define __builtin_clzl __lzcnt64
+#   define unlink _unlink
 #endif
 
 #include <atomic>
