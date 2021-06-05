@@ -856,17 +856,31 @@ void DynsymSection<E>::sort_symbols(Context<E> &ctx) {
     }
   };
 
+  if (symbols.size() == 0)
+  {
+    this->shdr.sh_info = 1;
+
+    if (ctx.gnu_hash) {
+      ctx.gnu_hash->num_buckets = 1;
+      ctx.gnu_hash->symoffset = 1;
+    }
+
+    ctx.dynstr->dynsym_offset = ctx.dynstr->shdr.sh_size;
+
+    return;
+  }
+
   std::vector<T> vec(symbols.size());
 
   for (i32 i = 1; i < symbols.size(); i++)
     vec[i] = {symbols[i], i, 0};
 
   // In any ELF file, local symbols should precede global symbols.
-  tbb::parallel_sort(vec.begin(), vec.end(), [](const T &a, const T &b) {
+  tbb::parallel_sort(vec.begin() + 1, vec.end(), [](const T &a, const T &b) {
     return std::tuple(a.is_local(), a.idx) < std::tuple(b.is_local(), b.idx);
   });
 
-  auto first_global = std::partition_point(vec.begin(), vec.end(),
+  auto first_global = std::partition_point(vec.begin() + 1, vec.end(),
                                            [](const T &x) {
     return x.is_local();
   });
