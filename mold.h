@@ -9,6 +9,7 @@
 #include "platform.h"
 
 #include "elf.h"
+#include "coff.h"
 
 #ifdef _MSC_VER
 #   include <intrin.h>

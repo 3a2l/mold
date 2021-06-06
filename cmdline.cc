@@ -474,7 +474,7 @@ void parse_nonpositional_args(Context<E> &ctx,
      ctx.arg.shared = true;
     } else if (read_arg(ctx, args, arg, "spare-dynamic-tags")) {
      ctx.arg.spare_dynamic_tags = parse_number(ctx, "spare-dynamic-tags", arg);
-    } else if (read_flag(args, "demangle")) {
+    /* } else if (read_flag(args, "demangle")) {
      ctx.arg.demangle = true;
     } else if (read_flag(args, "no-demangle")) {
      ctx.arg.demangle = false;
@@ -495,6 +495,7 @@ void parse_nonpositional_args(Context<E> &ctx,
      ctx.arg.init = arg;
     } else if (read_arg(ctx, args, arg, "fini")) {
      ctx.arg.fini = arg;
+    */
     } else if (read_arg(ctx, args, arg, "hash-style")) {
      if (arg == "sysv") {
        ctx.arg.hash_style_sysv = true;
@@ -507,7 +508,7 @@ void parse_nonpositional_args(Context<E> &ctx,
        ctx.arg.hash_style_gnu = true;
      } else {
        Fatal(ctx) << "invalid --hash-style argument: " << arg;
-     }
+     }/*
     } else if (read_arg(ctx, args, arg, "soname") ||
               read_arg(ctx, args, arg, "h")) {
      ctx.arg.soname = arg;
@@ -595,10 +596,10 @@ void parse_nonpositional_args(Context<E> &ctx,
     } else if (read_flag(args, "no-fatal-warnings")) {
      ctx.arg.fatal_warnings = false;
     } else if (read_flag(args, "fork")) {
-     ctx.arg.fork = true;
+     ctx.arg.fork = true;*/
     } else if (read_flag(args, "no-fork")) {
       ctx.arg.fork = false;
-    } else if (read_flag(args, "gc-sections")) {
+    /* } else if (read_flag(args, "gc-sections")) {
      ctx.arg.gc_sections = true;
     } else if (read_flag(args, "no-gc-sections")) {
      ctx.arg.gc_sections = false;
@@ -628,9 +629,9 @@ void parse_nonpositional_args(Context<E> &ctx,
      ctx.arg.thread_count = parse_number(ctx, "thread-count", arg);
     } else if (read_flag(args, "threads")) {
      ctx.arg.thread_count = get_default_thread_count();
-    } else if (read_flag(args, "no-threads")) {
+    */} else if (read_flag(args, "no-threads")) {
       ctx.arg.thread_count = 1;
-    } else if (read_flag(args, "discard-all") || read_flag(args, "x")) {
+    /* } else if (read_flag(args, "discard-all") || read_flag(args, "x")) {
       ctx.arg.discard_all = true;
     } else if (read_flag(args, "discard-locals") || read_flag(args, "X")) {
       ctx.arg.discard_locals = true;
@@ -722,7 +723,7 @@ void parse_nonpositional_args(Context<E> &ctx,
                read_arg(ctx, args, arg, "T")) {
       remaining.push_back(arg);
     } else if (read_flag(args, "push-state")) {
-      remaining.push_back("-push-state");
+      remaining.push_back("-push-state");*/
     } else if (read_flag(args, "pop-state")) {
       remaining.push_back("-pop-state");
     } else {

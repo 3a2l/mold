@@ -70,6 +70,8 @@ target_sources(mold
         arch_x86_64.cc
         archive_file.cc
         cmdline.cc
+        coff.cc
+        coff.h
         compress.cc
         elf.h
         filepath.cc

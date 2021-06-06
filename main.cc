@@ -39,6 +39,19 @@ template <typename E>
 static FileType get_file_type(Context<E> &ctx, MemoryMappedFile<E> *mb) {
   u8 *data = mb->data(ctx);
 
+  if (mb->size() >= 160)
+  {
+      COFF::Header& coff_header = *(COFF::Header*)data;
+      fprintf(stdout, "machine: %s\n", COFF::machine_type_to_string(coff_header.Machine).c_str());
+      fprintf(stdout, "number of sections: %d\n", coff_header.NumberOfSections);
+      fprintf(stdout, "time/date stamp: %d\n", coff_header.TimeDateStamp);
+      fprintf(stdout, "pointer to symbol table: %p\n", coff_header.PointerToSymbolTable);
+      fprintf(stdout, "number of symbols: %d\n", coff_header.NumberOfSymbols);
+      fprintf(stdout, "size of optional header: %d\n", coff_header.SizeOfOptionalHeader);
+      fprintf(stdout, "characteristics: %d\n", coff_header.Characteristics);
+      return FileType::OBJ;
+  }
+
   if (mb->size() >= 20 && memcmp(data, "\177ELF", 4) == 0) {
     ElfEhdr<E> &ehdr = *(ElfEhdr<E> *)data;
     if (ehdr.e_type == ET_REL)
@@ -658,7 +671,13 @@ int do_main(int argc, char **argv) {
   return 0;
 }
 
-enum class MachineType { X86_64, I386 };
+enum class LinkerFlavor { ELF, COFF };
+enum class MachineArch { X86_64, I386 };
+struct MachineType
+{
+    LinkerFlavor flavor;
+    MachineArch arch;
+};
 
 static MachineType get_machine_type(int argc, char **argv) {
   for (i64 i = 1; i < argc; i++) {
@@ -669,24 +688,40 @@ static MachineType get_machine_type(int argc, char **argv) {
 
       std::string_view val(argv[i]);
       if (val == "elf_x86_64")
-        return MachineType::X86_64;
+        return { LinkerFlavor::ELF, MachineArch::X86_64 };
       if (val == "elf_i386")
-        return MachineType::I386;
+        return { LinkerFlavor::ELF, MachineArch::I386 };
+      if (val == "coff_x86_64")
+        return { LinkerFlavor::COFF, MachineArch::X86_64 };
+      if (val == "coff_i386")
+        return { LinkerFlavor::COFF, MachineArch::X86_64 };
       std::cerr << "unknown -m argument: " << val << "\n";
       exit(1);
     }
   }
-  return MachineType::X86_64;
-  //  std::cerr << "-m is missing";
-  //  exit(1);
+  return { LinkerFlavor::ELF, MachineArch::X86_64 };
 }
 
 int main(int argc, char **argv) {
-  switch (get_machine_type(argc, argv)) {
-  case MachineType::X86_64:
-    return do_main<X86_64>(argc, argv);
-  case MachineType::I386:
-    return do_main<I386>(argc, argv);
+  const auto& [flavor, arch] = get_machine_type(argc, argv);
+  switch (flavor) {
+    case LinkerFlavor::ELF: {
+        switch (arch) {
+          case MachineArch::X86_64:
+            return do_main<X86_64>(argc, argv);
+          case MachineArch::I386:
+            return do_main<I386>(argc, argv);
+        }
+      }
+
+  case LinkerFlavor::COFF: {
+      switch (arch) {
+      case MachineArch::X86_64:
+          return COFF::do_main(argc, argv);
+      case MachineArch::I386:
+          return COFF::do_main(argc, argv);
+      }
+    }
   }
 }
 

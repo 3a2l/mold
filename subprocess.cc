@@ -87,7 +87,7 @@ static std::string compute_sha256(std::span<std::string_view> argv) {
   for (std::string_view arg : argv) {
     if (arg != "-preload" && arg != "--preload") {
       update_sha(sha, arg.data(), arg.size());
-      update_sha(sha, (char []){ 0 }, 1);
+      update_sha(sha, { 0 }, 1);
     }
   }
 
